@@ -1,65 +1,64 @@
 const express = require("express");
-const { Configuration, OpenAIApi } = require("openai");
+const bodyParser = require("body-parser");
+const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
-app.use(express.json());
+app.use(bodyParser.json());
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+const PORT = process.env.PORT || 3000;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-const saudacaoInicial = `
-Oi! Eu sou a Sandra, a secretária virtual do José Gabriel.
+const promptBase = `
+Você é Sandra, a secretária virtual do José Gabriel (@josegabrielbuddy).
+Fale de forma clara, gentil e humana. Não use respostas automáticas nem longas demais. Sempre responda por partes e dê espaço pra pessoa continuar a conversa.
 
-Se quiser saber mais sobre ele ou agendar um atendimento, posso te ajudar com isso 💬✨
+Quando perguntarem sobre:
+- Agendamento, horários, consulta ou atendimento → diga: "Você pode ver todos os detalhes e agendar direto pelo site oficial da Doctoralia: https://www.doctoralia.com.br/z/RDZ5w8"
+- Pix ou valores → responda: "Todas as informações estão no site oficial da Doctoralia: https://www.doctoralia.com.br/z/RDZ5w8"
+- Instagram, TikTok ou mais sobre ele → diga: "Você pode conhecer melhor o José Gabriel no Instagram @josegabrielbuddy, no TikTok e pelo site www.iamSoulBuddy.com."
 
-🔗 Instagram: https://www.instagram.com/josegabrielbuddy  
-🎵 TikTok: https://www.tiktok.com/@iamsoulbuddy  
-👨‍⚕️ Doctoralia: https://www.doctoralia.com.br/jose-gabriel  
-📅 Agendamentos: https://www.iamsoulbuddy.com/sessaodobuddy
+Importante:
+- Nunca diga que você se conecta ou sente a pessoa. Diga que o José Gabriel vai se conectar e sentir na hora da consulta.
+- Você atende apenas em texto, como secretária. A consulta real é com ele, por WhatsApp após agendamento.
+
+Agora, continue a conversa de forma natural:
 `;
 
 app.post("/webhook", async (req, res) => {
-  const userMessage = req.body.message;
-
-  if (!userMessage) {
-    return res.status(400).json({ error: "Mensagem vazia." });
-  }
-
   try {
-    const response = await openai.createChatCompletion({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: `
-Você é a Sandra, secretária digital do José Gabriel.
-Fale de forma acolhedora e humana, sempre oferecendo ajuda.
-Nunca invente informações. Se a pessoa pedir para falar com ele, diga que o atendimento só acontece após o agendamento com pagamento via Pix.
-Se te perguntarem quem é o José Gabriel, diga que ele é especialista em escuta, estratégia e desbloqueio emocional.
-Sempre que possível, envie os links úteis no final.
+    const userMessage = req.body.message;
 
-Você não precisa perguntar o nome da pessoa, apenas converse naturalmente.
-          `.trim(),
+    const completion = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4",
+        messages: [
+          { role: "system", content: promptBase },
+          { role: "user", content: userMessage },
+        ],
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
         },
-        { role: "user", content: userMessage },
-      ],
-    });
+      }
+    );
 
-    const reply = response.data.choices[0].message.content;
-
-    res.json({
-      reply: saudacaoInicial + "\n\n" + reply,
-    });
+    const reply = completion.data.choices[0].message.content;
+    res.json({ reply });
   } catch (error) {
-    console.error("Erro na Sandra:", error);
-    res.status(500).json({ error: "Erro interno da Sandra." });
+    console.error("Erro no webhook:", error.message);
+    res.status(500).json({ error: "Erro interno no servidor." });
   }
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Sandra ativa na porta ${port}`);
+app.get("/", (req, res) => {
+  res.send("SandraBot online 🚀");
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
