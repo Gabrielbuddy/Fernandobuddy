@@ -6,8 +6,8 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const token = "EAAI6D0nD7KgBPJvIwViKelr05cNFMp1n2yRdZB3c4u6TdrfmMeQWdNV6JI14dZBYX4WnPT38EvIDDBKNsFmHt4GYpXeEag4PLX44XOBKotox2tZCdvt2Qc3oX97dAPtnA8PcIddCfUG0fD4pyFaceBAjunXm7SDmYmP7KXIbWuvAv9uZCpZCBYWjwiKSEXZBnAxwQt50uWUk0iXiuhck50rhUvwXGc6Kz2k8VMxZAQQ0F5yQMkZD
-const verify_token = "sandra_token_secreto";
+const token = "EAAI6D0nD7KgBPD2JIcbvDDGjBQ2MzBoE4RjjSEli4lJxOjqt8ES7XjfkYJBYqAll9cyeUBcsq4og5DVhifv4CYYWnBgqUVWESGPDVTKgEd0F4IHMB9kJ5OR2UPaRfL7vsheEqakeXeGcSliTsnj1Fq52ZAssc25TyH9fpwtg4zOOmYOm6H5g1NudfVxT4EZBBEsBugkovhx2YwyGrwlfBZAOXFnGU2MSZCie9P3QZCiKcngZDZD"
+const verify_token = "sandra_secreto";
 
 // Validação do webhook da Meta
 app.get("/webhook", (req, res) => {
