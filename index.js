@@ -1,64 +1,56 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const axios = require("axios");
-require("dotenv").config();
+import express from "express";
+import bodyParser from "body-parser";
+import dotenv from "dotenv";
+import OpenAI from "openai";
 
+dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 3000;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-const promptBase = `
-Você é Sandra, a secretária virtual do José Gabriel (@josegabrielbuddy).
-Fale de forma clara, gentil e humana. Não use respostas automáticas nem longas demais. Sempre responda por partes e dê espaço pra pessoa continuar a conversa.
-
-Quando perguntarem sobre:
-- Agendamento, horários, consulta ou atendimento → diga: "Você pode ver todos os detalhes e agendar direto pelo site oficial da Doctoralia: https://www.doctoralia.com.br/z/RDZ5w8"
-- Pix ou valores → responda: "Todas as informações estão no site oficial da Doctoralia: https://www.doctoralia.com.br/z/RDZ5w8"
-- Instagram, TikTok ou mais sobre ele → diga: "Você pode conhecer melhor o José Gabriel no Instagram @josegabrielbuddy, no TikTok e pelo site www.iamSoulBuddy.com."
-
-Importante:
-- Nunca diga que você se conecta ou sente a pessoa. Diga que o José Gabriel vai se conectar e sentir na hora da consulta.
-- Você atende apenas em texto, como secretária. A consulta real é com ele, por WhatsApp após agendamento.
-
-Agora, continue a conversa de forma natural:
-`;
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 app.post("/webhook", async (req, res) => {
   try {
     const userMessage = req.body.message;
+    const completion = await openai.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `
+Você é a Sandra, uma secretária digital humanizada que ajuda as pessoas com clareza, por partes, e com acolhimento.
 
-    const completion = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        model: "gpt-4",
-        messages: [
-          { role: "system", content: promptBase },
-          { role: "user", content: userMessage },
-        ],
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
+Nunca diga que você se conecta com as pessoas. Diga apenas que o José Gabriel é quem vai se conectar e sentir a pessoa.
+
+Você nunca agenda horários diretamente, nem envia links ou valores de cara. Tudo com calma.
+
+Fale com a pessoa com naturalidade, esperando a resposta dela antes de continuar.
+
+Quando for hora de agendar, diga: “você pode ver os horários disponíveis aqui: https://www.doctoralia.com.br/z/RDZ5w8”
+          `,
         },
-      }
-    );
+        {
+          role: "user",
+          content: userMessage,
+        },
+      ],
+      model: "gpt-4o",
+    });
 
-    const reply = completion.data.choices[0].message.content;
+    const reply = completion.choices[0].message.content;
     res.json({ reply });
   } catch (error) {
-    console.error("Erro no webhook:", error.message);
-    res.status(500).json({ error: "Erro interno no servidor." });
+    console.error("Erro:", error);
+    res.status(500).json({ error: "Erro interno do servidor." });
   }
 });
 
 app.get("/", (req, res) => {
-  res.send("SandraBot online 🚀");
+  res.send("Sandra está online. Prontinha pra ajudar!");
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+const port = process.env.PORT || 10000;
+app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
 });
