@@ -6,8 +6,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const token = "EAAI6D0nD7KgBPAOCMhWnwuBubcgdMX0xv04myfKhFgnZAusGRvyZCa3D2p643T4QgUadNVp9znfOjlRyEgI8X54gZB4oUPG4OCZCnerHherNaT7ubBKA6T2jkzhxJgnJZCzkN8bb7IX4osjdWj0zgNhkYrHugpGz6ywancsLwCjUjmjbZBAWlRZAlk2GWv0XU8W8r6DC5fYzSoocMJaSTk4edfTi5kSt1LnDarlcYzRkyqRXwZDZD";
-const phone_number_id = "721478814382979";
+const token = "EAAI6D0nD7KgBPJvIwViKelr05cNFMp1n2yRdZB3c4u6TdrfmMeQWdNV6JI14dZBYX4WnPT38EvIDDBKNsFmHt4GYpXeEag4PLX44XOBKotox2tZCdvt2Qc3oX97dAPtnA8PcIddCfUG0fD4pyFaceBAjunXm7SDmYmP7KXIbWuvAv9uZCpZCBYWjwiKSEXZBnAxwQt50uWUk0iXiuhck50rhUvwXGc6Kz2k8VMxZAQQ0F5yQMkZD
 const verify_token = "sandra_token_secreto";
 
 // Validação do webhook da Meta
