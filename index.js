@@ -1,4 +1,5 @@
 // index.js
+require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
 const bodyParser = require("body-parser");
@@ -6,16 +7,18 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const token = "EAAI6D0nD7KgBPD2JIcbvDDGjBQ2MzBoE4RjjSEli4lJxOjqt8ES7XjfkYJBYqAll9cyeUBcsq4og5DVhifv4CYYWnBgqUVWESGPDVTKgEd0F4IHMB9kJ5OR2UPaRfL7vsheEqakeXeGcSliTsnj1Fq52ZAssc25TyH9fpwtg4zOOmYOm6H5g1NudfVxT4EZBBEsBugkovhx2YwyGrwlfBZAOXFnGU2MSZCie9P3QZCiKcngZDZD"
-const verify_token = "sandra_secreto";
+// Agora usando variáveis de ambiente
+const token = process.env.TOKEN;
+const phone_number_id = process.env.PHONE_NUMBER_ID;
+const verify_token = process.env.VERIFY_TOKEN;
 
 // Validação do webhook da Meta
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
-  const token = req.query["hub.verify_token"];
+  const tokenReceived = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
-  if (mode && token === verify_token) {
+  if (mode && tokenReceived === verify_token) {
     console.log("WEBHOOK VERIFICADO ✅");
     res.status(200).send(challenge);
   } else {
@@ -34,7 +37,7 @@ app.post("/webhook", (req, res) => {
   const messages = value?.messages;
 
   if (messages && messages[0]) {
-    const from = messages[0].from; // telefone do remetente
+    const from = messages[0].from;
 
     const message = {
       messaging_product: "whatsapp",
@@ -60,7 +63,7 @@ app.post("/webhook", (req, res) => {
       res.sendStatus(500);
     });
   } else {
-    res.sendStatus(200); // Sem mensagens, mas responde para evitar erro na Meta
+    res.sendStatus(200);
   }
 });
 
